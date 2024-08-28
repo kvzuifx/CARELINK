@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Benefactor Distances</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet">
+
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Benefactor Distances</h1>
+        
+        {% if distances %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Benefactor Name</th>
+                        <th scope="col">Distance (km)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for benefactor, distance in distances %}
+                        <tr>
+                            <td>{{ benefactor.ben_name }}</td>
+                            <td>{{ distance|floatformat:2 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                No distances available. Ensure benefactor has valid coordinates.
+            </div>
+        {% endif %}
+    </div>
+    <!-- Bootstrap JS (Optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <div id="map" style="height: 600px;"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize the map centered on the user's coordinates
+            var userCoords = {{ map_data.user_coords|safe }};
+            if (!userCoords || userCoords.length !== 2) {
+                console.error('Invalid user coordinates.');
+                return;
+            }
+    
+            var map = L.map('map').setView(userCoords, 12);
+            
+            // Add tile layer to the map
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+            }).addTo(map);
+            
+            // Add marker for the user
+            L.marker(userCoords, { color: 'red' }).addTo(map).bindPopup('<b>Your Location</b>');
+            
+            // Add markers and straight lines for the nearest benefactors
+            {% if map_data.nearest_benefactors %}
+                {% for benefactor in map_data.nearest_benefactors %}
+                    var benefactorCoords = {{ benefactor.coords|safe }};
+                    if (benefactorCoords && benefactorCoords.length === 2) {
+                        // Add marker for the benefactor
+                        var marker = L.marker(benefactorCoords).addTo(map);
+                        marker.bindPopup('<b>{{ benefactor.name }}</b><br>Distance: {{ benefactor.distance }} km');
+                        
+                        // Draw a straight line from user to benefactor
+                        L.polyline([userCoords, benefactorCoords], {
+                            color: 'blue',
+                            weight: 3,
+                            opacity: 0.7
+                        }).addTo(map);
+                    } else {
+                        console.error('Invalid benefactor coordinates.');
+                    }
+                {% endfor %}
+            {% else %}
+                console.error('No nearest benefactors found.');
+            {% endif %}
+        });
+    </script>
+    
+    
+    
+    
+</body>
+</html>

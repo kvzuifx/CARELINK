@@ -1,0 +1,67 @@
+{%load static %}
+<!DOCTYPE html>
+<html>
+    
+<head>
+	<title>Login</title>
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700|Raleway:300,600" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css'>
+    <!-- <link rel="stylesheet" type="text/css" href={% static 'css/login.css' %}> -->
+	<link rel="stylesheet" type="text/css" href={% static 'css/pre.css' %}>
+	
+
+</head>
+<body background="dark">
+
+	<div class="container">
+	   <section id="formHolder">
+		  <div class="row">
+			 <!-- Brand Box -->
+			 <div class="col-sm-6 brand">
+				<a href="#" class="logo">Welcome<span>.</span></a>
+				<div class="heading">
+				   <h2>Carelink</h2>
+				   <p>Symbol of Hope</p>
+				</div>
+				<div class="success-msg">
+				   <p>Great! You are one of our members now</p>
+				   <a href="index.html" class="index">Home</a>
+				</div>
+			 </div>
+			 <!-- Form Box -->
+			 <div class="col-sm-6 form">
+				<!-- Login Form -->
+				<div class="login form-peice switched">
+					
+				   <form class="login-form"  method="POST" action="">
+					  {% csrf_token %}
+					  <div class="form-group">
+						 <label for="username">Username</label>
+						 <input class="form-control" type="username" name="username" id="username" required>
+					  </div>
+					  <div class="form-group">
+						 <label for="password">Password</label>
+						 <input class="form-control" type="password" name="password" id="password" required >
+					  </div>
+					  <div class="CTA">
+						 <input type="submit" value="Login">
+						 <a href="#" class="switch">I'm New</a>
+					  </div>
+				   </form>
+				</div>
+		{% for message in messages%}
+        <p id="messages"> {{message}} </p>
+        {%endfor%}
+
+			  </div>
+		   </div>
+		</section>
+	 </div>
+	 
+	 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+	 <script src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js'></script>
+	 <script src="{% static 'js/login.js' %}"></script>
+	 </body>
+	 </html>
+	 

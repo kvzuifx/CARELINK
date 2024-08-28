@@ -1,0 +1,21 @@
+{% load static  %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" type ='text/css' href = {% static '/css/main.css'%} />
+</head>
+
+<body>
+{% include 'care/navbar.html' %}
+woo  <br> </br>
+{% block content %}
+main pagesssssss <!-- excludes when inherited-->
+{% endblock%}
+{% comment %} <h1><a href="{% url 'create_multiple_communities' %}">Create Multiple Communities</a></h1> {% endcomment %}
+MARM
+</body>
+
+</html>

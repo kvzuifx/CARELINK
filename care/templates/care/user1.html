@@ -1,0 +1,497 @@
+
+{%load static%}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Admin Dashboard | Redesign</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        .notification-popup {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: red;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            animation: fadein 0.5s, fadeout 0.5s 4.5s;
+        }
+        
+        /* Keyframes for the fade-in and fade-out animations */
+        @keyframes fadein {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+        
+        @keyframes fadeout {
+            from {opacity: 1;}
+            to {opacity: 0;}
+        }
+        
+        {% comment %} .notification-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #ffcccb; /* Pastel red background */
+            color: #333;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out; /* Fade-in effect */
+        }
+
+        .notification-box.visible {
+            opacity: 1;
+            display: block;
+        }
+
+        .notification-item {
+            margin-bottom: 10px;
+        }
+
+        .notification-box .close-btn {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #333;
+        } {% endcomment %}
+       #map {
+            height: 1150px; /* Adjust the height as needed */
+            width: 100%;
+            position: relative; /* Ensure map container is relative for positioning */
+        }
+        .leaflet-control-custom {
+    background-color: rgb(217, 84, 84);
+    border: none; /* Remove the border */
+    border-radius: 8px; /* Increased border radius for a more rounded button */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5); /* Increased shadow for better visibility */
+    cursor: pointer;
+    text-align: center;
+    line-height: 40px; /* Increased line-height to match the new height */
+    font-size: 18px; /* Increased font size */
+    padding: 10px 20px; /* Increased padding */
+    margin: 10px; /* Increased margin */
+    position: absolute; /* Position it at the bottom right */
+    bottom: 10px;
+    right: 10px;
+    z-index: 1000; /* Ensure the button is on top */
+}
+
+
+        .leaflet-control-custom:hover {
+            background-color: #84c86d; /* Darker color on hover */
+        }
+/* Centering and Styling the Popup Form */
+.form-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the form */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px;
+    background-color: #fff; /* White background */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Subtle shadow */
+    z-index: 1000; /* Ensure the form is on top */
+    max-width: 500px; /* Increase the max-width */
+    width: 100%; /* Full width up to max-width */
+}
+
+/* Styling for form inputs and buttons */
+.form-popup input, .form-popup button {
+    margin: 10px 0;
+    padding: 12px; /* Adjusted padding for better appearance */
+    border-radius: 5px; /* Rounded corners */
+    border: 1px solid #ccc; /* Light grey border */
+    width: calc(100% - 24px); /* Full width with padding adjustment */
+    font-size: 16px; /* Larger font size for readability */
+}
+
+.form-popup input {
+    font-size: 16px; /* Ensures input font size is appropriate */
+}
+
+.form-popup button {
+    font-size: 16px; /* Consistent font size for buttons */
+    background-color: #b8dc95; /* Primary color for buttons */
+    color: #000000; /* Black text color */
+    border: none; /* Remove default border */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.form-popup button:hover {
+    background-color: #ffeb79; /* Darker color on hover */
+}
+
+.form-popup button.close {
+    background: #ffffff; /* White background for close button */
+    color: rgb(0, 0, 0);
+    border: none;
+}
+
+.form-popup button.close:hover {
+    background: #f5f5f5; /* Slightly darker white on hover */
+}
+
+/* Custom marker dot */
+.custom-dot {
+    background-color: red;
+    border-radius: 50%;
+    width: 30px; /* Size of the dot */
+    height: 30px;
+    display: block;
+    border: 3px solid #ffffff; /* Optional: white border around the dot */
+}
+
+/*navbar*/
+/* Topbar Container */
+/* Topbar Container */
+.topbar {
+    display: flex;
+    justify-content: space-between; /* Space out the items */
+    align-items: center;
+    background: var(--blue);
+    height: 60px;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+/* Menu Toggle */
+.topbar .toggle {
+    font-size: 2.0em; /* Adjust as needed */
+    color: var(--white);
+}
+
+/* Center Navigation Links */
+.topbar .nav-links {
+    display: flex;
+    justify-content: center; /* Center the links horizontally */
+    flex-grow: 1; /* Allow the nav-links to take up available space */
+    gap: 30px; /* Adjust spacing between links */
+    font-size: 1.15em; /* Font size matching previous design */
+}
+
+.topbar .nav-links a {
+    text-decoration: none;
+    color: var(--white);
+    font-size: 1em; /* Font size matching previous design */
+    font-weight: 500; /* Font weight matching previous design */
+    position: relative;
+    transition: color 0.3s, transform 0.3s;
+}
+
+/* Add underline on hover */
+.topbar .nav-links a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 0;
+    height: 2px;
+    background: black;
+    transition: width 0.3s, background-color 0.3s;
+}
+
+/* Hover effect for links */
+.topbar .nav-links a:hover {
+    color: var(--hover-color);
+    transform: scale(1.1); /* Slightly increase the size on hover */
+    animation: pulse 1s ease infinite; /* Add pulse animation */
+}
+
+/* Underline expands on hover */
+.topbar .nav-links a:hover::after {
+    width: 100%;
+}
+
+/* Cool Animation for Link Hover */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+
+    </style>
+</head>
+<body>
+    <!-- Notification Box -->
+ 
+    
+    {% comment %} <div id="notification-box" class="notification-box">
+        <button class="close-btn" onclick="closeNotification()">×</button>
+        {% for notification in notifications %}
+        <div class="notification-item">
+            <strong>{{ notification.notif_type }}:</strong> {{ notification.message }} at {{ notification.timestamp|date:"Y-m-d H:i:s" }}
+        </div>
+        {% endfor %}
+    </div> {% endcomment %}
+    <div class="container">
+        <div class="navigation">
+            <ul>
+                <li>
+                    <a href="#">
+                        <span class="title"><h3>C <b>+</b> L</h3></span>
+                    </a>
+                    <div style="border-top: 1px solid #060606; margin: 0px;"></div>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="icon"><ion-icon name="map-outline"></ion-icon></span>
+                        <span class="title">Map</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'chat_view'  %}" class="btn btn-info">
+                        <span class="icon"><ion-icon name="chatbox-outline"></ion-icon></span>
+                        <span class="title">Message</span>
+                        <div id="notification-popup" class="notification-popup">
+                            <p>You got a new request at 12:56 AM. Check it out!</p>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'upload_id_proof' user_id=user_benefactor.user_id %}" class="btn btn-info">
+                        <span class="icon"><ion-icon name="help-outline"></ion-icon></span>
+                        <span class="title">ID Details</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <span class="icon"><ion-icon name="settings-outline"></ion-icon></span>
+                        <span class="title">Settings</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'dash' user_id=user_benefactor.user_id %}" class="btn btn-info">
+                        <span class="icon"><ion-icon name="person-circle-outline"></ion-icon></span>
+                        <span class="title">Dashboard</span>
+                    </a>
+                </li>
+                {% comment %} <li>
+                    <a href="{% url 'notifications' user_id=user_benefactor.user_id %}" class="btn btn-info">
+                        <span class="icon"><ion-icon name="notifications-outline"></ion-icon></span>
+                        <span class="title">Notifs</span>
+                    </a>
+                </li> {% endcomment %}
+                <li>
+                    <a href="{% url 'distance_info' user_id=user_benefactor.user_id %}" class="btn btn-info">
+                        <span class="icon"><ion-icon name="navigate-outline"></ion-icon></span>
+                        <span class="title">Distance Info</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'benefactor_requests'  user_id=user_benefactor.user_id  %}" class="btn btn-info">
+                        <span class="icon"><ion-icon name="navigate-outline"></ion-icon></span>
+                        <span class="title">View Requests Data</span>
+                    </a>
+                </li>               
+                <div style="border-top: 1px solid #000000; margin: 0px;"></div>
+                <li>
+                    <a href="{% url 'logout' %}" class="btn btn-info">
+                        <span class="icon"><ion-icon name="log-out-outline"></ion-icon></span>
+                        <span class="title">Sign Out</span>
+                    </a>
+                </li>
+
+            </ul>
+        </div>
+        
+        <div class="main">
+            <div class="topbar">
+                <div class="toggle">
+                    <ion-icon name="menu-outline"></ion-icon>
+                </div>
+                <div class="nav-links">
+                    <a href="#">Home</a>
+                    <a href="#">About</a>
+                    <a href="#">Account</a>
+                    <a href="#">FAQ's</a>
+                    <a href="#">Contact</a>
+                    <a href="{% url 'notifications' user_id=user_benefactor.user_id %}" class="btn btn-info">View Notifications</a>
+                </div>
+            </div>
+        
+            <div id="map" style="height: 600px;"></div>
+        </div>
+    </div>
+
+    <!-- Popup Form for Supply Request -->
+    <div id="form-popup" class="form-popup">
+        <h3>Supply Request Form</h3>
+        <form method="post" id="address-form">
+            {% csrf_token %}
+            {{ request_form.as_p }}
+            <button type="submit">Submit</button>
+            <button type="button" class="close" onclick="closeForm()">Close</button>
+        </form>
+        <div id="form-response"></div> <!-- To show success/error messages -->
+    </div>
+    
+    <!-- Popup Form for Marker Details -->
+    <div id="marker-popup" class="form-popup">
+        <h3>Marker Details</h3>
+        <div id="marker-details"></div>
+        <form id="marker-form">
+            <input type="text" id="comment" placeholder="Comment">
+            <input type="number" id="additional-supplies" placeholder="Additional Supplies">
+            <button type="submit">Submit</button>
+            <button type="button" class="close" onclick="closeMarkerForm()">Close</button>
+        </form>
+    </div>
+
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize the map
+            var map = L.map('map').setView([17.3850, 78.4867], 12); // Center the map on a default location (e.g., Hyderabad)
+    
+            // Add a tile layer (using OpenStreetMap tiles here)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+            }).addTo(map);
+    
+            // Sample coordinates array
+            var coordinates = [
+                { lat: 17.3850, lng: 78.4867, name: 'Lakhan Hospitals, ChaderGath' },
+                { lat: 17.4000, lng: 78.5000, name: 'Care Lok Charity, Himayath Nagar' },
+                { lat: 17.4500, lng: 78.4500, name: 'HD Hospitals, Sanath Nagar' },
+            ];
+    
+            coordinates.forEach(function(location) {
+                var marker = L.marker([location.lat, location.lng]).addTo(map);
+                marker.bindPopup('<b>' + location.name + '</b><br>Coordinates: ' + location.lat + ', ' + location.lng);
+            });
+    
+            // Custom control button (already styled in your CSS)
+            var customControl = L.Control.extend({
+                options: {
+                    position: 'bottomright'
+                },
+                onAdd: function (map) {
+                    var container = L.DomUtil.create('div', 'leaflet-control-custom');
+                    container.innerHTML = "Request Supply";
+                    container.onclick = function() {
+                        document.getElementById('form-popup').style.display = 'block';
+                    };
+                    return container;
+                }
+            });
+            map.addControl(new customControl());
+        });
+
+        // Function to close the supply request form
+        function closeForm() {
+            document.getElementById('form-popup').style.display = 'none';
+        }
+
+        // Function to close the marker details form
+        function closeMarkerForm() {
+            document.getElementById('marker-popup').style.display = 'none';
+        }
+    </script>
+
+    <script>
+        // Menu Toggle
+        let toggle = document.querySelector('.toggle');
+        let navigation = document.querySelector('.navigation');
+        let main = document.querySelector('.main');
+        toggle.onclick = function(){
+            navigation.classList.toggle('active');
+            main.classList.toggle('active');
+        }
+
+        // Add hovered class in selected list item
+        let list = document.querySelectorAll('.navigation li');
+        function activeLink() {
+            list.forEach((item) => item.classList.remove('hovered'));
+            this.classList.add('hovered');
+        }
+        list.forEach((item) => item.addEventListener('mouseover', activeLink));
+
+  
+        document.addEventListener("DOMContentLoaded", function() {
+            {% if notifications %}
+            showNotification();
+            {% endif %}
+        }///
+
+
+        document.getElementById('address-form').addEventListener('submit', function(event) {
+            event.preventDefault();  // Prevent the default form submission
+        
+            var form = event.target;
+            var formData = new FormData(form);
+        
+            // Use the correct URL name and ensure `user_id` is available in the context
+            fetch('{% url "user_page" user_id=user_id %}', {  
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value  // Include CSRF token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('form-response').innerHTML = `<p>Request submitted successfully!</p>`;
+                    form.reset();
+                    closeForm();
+                } else {
+                    document.getElementById('form-response').innerHTML = `<p>Error: ${data.error}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('form-response').innerHTML = `<p>Something went wrong. Please try again.</p>`;
+            });
+        });
+        
+        function closeForm() {
+            document.getElementById('form-popup').style.display = 'none';  // Hide the form popup
+        }
+
+// Function to show the notification popup
+function showNotification() {
+    var popup = document.getElementById('notification-popup');
+    popup.style.display = 'block';
+
+    // Hide the notification after 5 seconds
+    setTimeout(function() {
+        popup.style.display = 'none';
+    }, 5000);
+}
+
+// Call the function to show the notification (e.g., after receiving a new request)
+showNotification();
+
+    </script>
+</body>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View ID Proof</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa; /* Match background color to previous design */
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh; /* Full viewport height */
+        }
+
+        /* Navbar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff; /* White background */
+            height: 60px;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .topbar .toggle {
+            font-size: 2.0em;
+            color: #333; /* Dark color for toggle */
+        }
+
+        .topbar .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+            gap: 20px; /* Adjust spacing between links */
+            font-size: 1em;
+        }
+
+        .topbar .nav-links a, .topbar .btn {
+            text-decoration: none;
+            color: #333; /* Dark color for text */
+            font-size: 1em;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s, color 0.3s;
+            display: inline-block;
+        }
+
+        .topbar .nav-links a:hover, .topbar .btn:hover {
+            background-color: #f1f1f1; /* Light grey background on hover */
+            color: #000; /* Black text color on hover */
+        }
+
+        .topbar .nav-links a {
+            background-color: transparent; /* Transparent background for links */
+        }
+
+        .topbar .nav-links a::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -5px;
+            width: 0;
+            height: 2px;
+            background: black;
+            transition: width 0.3s, background-color 0.3s;
+        }
+
+        /* Hover effect for links */
+        .topbar .nav-links a:hover {
+            color: #49743b; /* Custom hover color */
+            transform: scale(1.1); /* Slightly increase the size on hover */
+            animation: pulse 1s ease infinite; /* Add pulse animation */
+        }
+
+        /* Underline expands on hover */
+        .topbar .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 800px; /* Increased max-width */
+            background: #fff;
+            padding: 50px; /* Increased padding */
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: left; /* Align text to the left */
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 32px; /* Increased font size for the header */
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .content p {
+            font-size: 18px;
+            color: #666;
+            margin: 15px 0; /* Increased margin for spacing */
+            display: flex;
+            justify-content: space-between; /* Align label and value */
+        }
+
+        .content p span.label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .content p span.value {
+            color: #666;
+        }
+
+        .btn-download {
+            background-color: #49743b; /* Custom button background color */
+            color: #fff; /* Button text color */
+            border: none;
+            padding: 12px 24px; /* Increased padding */
+            font-size: 18px; /* Increased font size */
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            text-align: center;
+            display: inline-block;
+            margin-top: 20px; /* Add spacing above the button */
+        }
+
+        .btn-download:hover {
+            background-color: #365c2b; /* Darker shade on hover */
+            color: #fff; /* Ensure text color remains readable */
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="topbar">
+            <div class="toggle">
+                <ion-icon name="menu-outline"></ion-icon>
+            </div>
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">About</a>
+                <a href="#">Account</a>
+                <a href="#">FAQ's</a>
+                <a href="#">Contact</a>
+                <a href="#">View Notifications</a>
+            </div>
+        </div>
+
+        <div class="content">
+            <h1>Your ID Proof</h1>
+            {% if id_proof %}
+                <p><span class="label">Proof Type:</span> <span class="value">{{ id_proof.proof_type }}</span></p>
+                <p><span class="label">Proof Number:</span> <span class="value">{{ id_proof.proof_number }}</span></p>
+                <p><span class="label">Issue Date:</span> <span class="value">{{ id_proof.issue_date }}</span></p>
+                <p><span class="label">Expiry Date:</span> <span class="value">{{ id_proof.expiry_date }}</span></p>
+                <a class="btn-download" href="{{ id_proof.proof_document.url }}">Download Proof Document</a>
+            {% else %}
+                <p>No ID proof uploaded yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

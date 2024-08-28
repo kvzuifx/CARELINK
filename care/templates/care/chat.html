@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Chatbot</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e5ddd5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .chat-popup {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            display: none;
+            flex-direction: column;
+            background: #fff;
+            animation: slideIn 0.3s ease-out;
+        }
+        .chat-popup.active {
+            display: flex;
+        }
+        .chat-header {
+            background: #128C7E;
+            color: #fff;
+            padding: 15px;
+            font-size: 20px;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+        }
+        .chat-header::after {
+            content: '×';
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        .chat-box {
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            background-color: #f4f4f9;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            padding: 12px;
+            border-radius: 12px;
+            max-width: 75%;
+            clear: both;
+            position: relative;
+            margin-bottom: 10px;
+        }
+        .message.user {
+            background: #dcf8c6;
+            margin-left: auto;
+            text-align: right;
+            border-radius: 12px 12px 0 12px;
+        }
+        .message.user:after {
+            content: '';
+            position: absolute;
+            top: 12px;
+            right: -15px;
+            border-width: 12px;
+            border-style: solid;
+            border-color: transparent transparent transparent #dcf8c6;
+        }
+        .message.bot {
+            background: #fff;
+            border: 1px solid #ddd;
+            margin-right: auto;
+            color: #333;
+            border-radius: 12px 12px 12px 0;
+        }
+        .message.bot:before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: -15px;
+            border-width: 12px;
+            border-style: solid;
+            border-color: transparent #fff transparent transparent;
+        }
+        .input-group {
+            display: flex;
+            border-top: 1px solid #ddd;
+            padding: 10px;
+            background: #fff;
+            align-items: center;
+        }
+        .loading-message {
+           font-style: italic;
+           color: #888;
+           margin-top: 10px;
+           text-align: center;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            margin-right: 10px;
+            font-size: 16px;
+            outline: none;
+        }
+        .input-group input:focus {
+            border-color: #128C7E;
+        }
+        .input-group button {
+            padding: 12px 20px;
+            border: none;
+            background-color: #128C7E;
+            color: #fff;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .input-group button:hover {
+            background-color: #0f6b54;
+        }
+        .welcome-message {
+            background: #128C7E;
+            color: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <button id="chat-toggle" style="position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; border: none; background-color: #128C7E; color: #fff; border-radius: 20px; cursor: pointer;">Chat</button>
+
+    <div class="chat-popup" id="chat-popup">
+        <div class="chat-header" onclick="toggleChat()">The Supply Genie</div>
+        <div class="chat-box" id="chat-box">
+            <div class="welcome-message">Welcome! How can I assist you today?</div>
+            <!-- Messages will be inserted here -->
+        </div>
+        <div class="input-group">
+            <input type="text" id="ocr-text" placeholder="Enter OCR text here" onkeypress="checkEnter(event)">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatPopup = document.getElementById('chat-popup');
+        const chatToggle = document.getElementById('chat-toggle');
+
+        chatToggle.addEventListener('click', () => {
+            chatPopup.classList.toggle('active');
+        });
+
+        function appendMessage(content, type) {
+            const chatBox = document.getElementById('chat-box');
+            const message = document.createElement('div');
+            message.classList.add('message', type);
+            message.textContent = content;
+            chatBox.appendChild(message);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendMessage() {
+            const ocrText = document.getElementById('ocr-text').value;
+            if (!ocrText.trim()) return;
+
+            appendMessage(ocrText, 'user');
+
+            // Add a funny loading message
+            const loadingMessage = document.createElement('div');
+            loadingMessage.classList.add('loading-message');
+            loadingMessage.textContent = "The Supply Genie is thinking... 💭✨";
+            document.getElementById('chat-box').appendChild(loadingMessage);
+
+            fetch('{% url "chat_view" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: new URLSearchParams({
+                    'ocr_text': ocrText,
+                    'question': ocrText  // Adjust according to your requirement///////////////////////////////
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Prompt Sent:', data.prompt);  // Log prompt
+                console.log('Response Received:', data.response);  // Log response
+
+                // Remove the loading message
+                document.querySelector('.loading-message').remove();
+                appendMessage(data.response, 'bot');
+            })
+            .catch(error => {
+                // Remove the loading message
+                document.querySelector('.loading-message').remove();
+                appendMessage('Oops! Something went wrong. Please try again.', 'bot');
+                console.error('Error:', error);
+            });
+
+            // Clear the input field after sending
+            document.getElementById('ocr-text').value = '';
+        }
+
+        function checkEnter(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Close chat popup when clicking outside of it
+        window.addEventListener('click', function(event) {
+            if (event.target !== chatPopup && !chatPopup.contains(event.target) && !chatToggle.contains(event.target)) {
+                chatPopup.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

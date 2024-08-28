@@ -1,0 +1,21 @@
+{% extends 'care/base.html' %}
+{% load static %}
+
+{% block content %}
+<a href="{% url 'dash' user_id=user.id %}" class="btn btn-outline-primary my-3 mx-4">Go Back</a>
+
+	<div class="row">
+		<div class="col-11 col-md-4 mx-auto mt-5">
+			<h1>Inventory Item</h1>
+
+			<form method="POST">
+				{% csrf_token %}
+				{{supply_form.as_p }}
+
+				<div class="mt-3">
+					<a href="{% url 'dash' user_id=user.id %}"><button class="btn btn-primary" type="submit" name="addSupply">Add Item</button></a>
+				</div>
+			</form>
+		</div>
+	</div>
+{% endblock content %}

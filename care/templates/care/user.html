@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+{%load static%}
+<html>
+<head>
+    <title>Request Form</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#id_dest_loc').on('input', function() {
+                let query = $(this).val();
+                if (query.length > 2) {  // Adjust the minimum length as needed
+                    $.ajax({
+                        url: "{% url 'location_suggestions' %}",
+                        data: { 'q': query },
+                        success: function(data) {
+                            console.log('AJAX response:', data); // Log the response data
+                            let suggestions = data.map(item => `<div>${item.address}</div>`).join('');
+                            $('#suggestions').html(suggestions);
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX Error:', status, error);
+                        }
+                    });
+                } else {
+                    $('#suggestions').html('');
+                }
+            });
+
+            $(document).on('click', '#suggestions div', function() {
+                $('#id_dest_loc').val($(this).text());
+                $('#suggestions').html('');
+            });
+        });
+    
+    </script>
+</head>
+<body>
+    <h1>Request Form</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ request_form.as_p }}
+        <div id="suggestions" style="border: 1px solid #ddd; max-height: 150px; overflow-y: auto;"></div>
+        <button type="submit">Submit</button>
+    </form>
+    {% if error_message %}
+    <p>{{ error_message }}</p>
+    {% endif %}
+    <!-- Inside user.html -->
+{% if nearest_benefactors %}
+<a href="{% url 'distance_info' user_id=user_benefactor.user_id %}">View Distance Information</a>
+{% endif %}
+
+{% block content %}
+    <!-- Existing content -->
+    <a href="{% url 'notifications' user_id=user_benefactor.user_id %}" class="btn btn-info">View Notifications</a>
+
+    <!-- Existing content -->
+{% endblock %}
+
+</body>
+</html>

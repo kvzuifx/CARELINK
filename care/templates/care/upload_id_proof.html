@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload ID Proof</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css" integrity="sha384-wXznGJNEXNG1NFsbm0ugrLFMQPWswR3lds2VeinahP8N0zJw9VWSopbjv2x7WCvX" crossorigin="anonymous">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar */
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff; /* White background */
+            height: 60px;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .topbar .toggle {
+            font-size: 2.0em;
+            color: #333; /* Dark color for toggle */
+        }
+
+        .topbar .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-grow: 1;
+            gap: 20px; /* Adjust spacing between links */
+            font-size: 1em;
+        }
+
+        .topbar .nav-links a, .topbar .btn {
+            text-decoration: none;
+            color: #333; /* Dark color for text */
+            font-size: 1em;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 4px;
+            transition: background-color 0.3s, color 0.3s;
+            display: inline-block;
+        }
+
+        .topbar .nav-links a:hover, .topbar .btn:hover {
+            background-color: #f1f1f1; /* Light grey background on hover */
+            color: #000; /* Black text color on hover */
+        }
+
+        .topbar .nav-links a {
+            background-color: transparent; /* Transparent background for links */
+        }
+
+        .topbar .nav-links a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 0;
+    height: 2px;
+    background: black;
+    transition: width 0.3s, background-color 0.3s;
+}
+
+/* Hover effect for links */
+.topbar .nav-links a:hover {
+    color: var(--hover-color);
+    transform: scale(1.1); /* Slightly increase the size on hover */
+    animation: pulse 1s ease infinite; /* Add pulse animation */
+}
+
+/* Underline expands on hover */
+.topbar .nav-links a:hover::after {
+    width: 100%;
+}
+
+/* Cool Animation for Link Hover */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+        /* Navbar end */
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 16px 24px 2px rgba(0, 0, 0, 0.14), 
+                        0 6px 30px 5px rgba(0, 0, 0, 0.12), 
+                        0 8px 10px -5px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 400;
+            font-size: 1.2rem;
+            color: #555;
+        }
+
+        form {
+            margin-top: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            flex-basis: 40%;
+            text-align: left;
+            margin-left: 20px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .form-group input, .form-group select {
+            flex-basis: 55%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        button[type="submit"] {
+            display: block;
+            width: 100%;
+            background-color: #71ae64;
+            color: black;
+            border: none;
+            padding: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 1rem;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="main">
+        <div class="topbar">
+            <div class="toggle">
+                <ion-icon name="menu-outline"></ion-icon>
+            </div>
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">About</a>
+                <a href="#">Account</a>
+                <a href="#">FAQ's</a>
+                <a href="#">Contact</a>
+                <a href="#">View Notifications</a>
+            </div>
+        </div>
+    </div>
+        <div class="container">
+            <h1>Upload ID Proof</h1>
+            <h2>Please fill in the details below</h2>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="proof_type">Proof Type:</label>
+                    {{ form.proof_type }}
+                </div>
+                <div class="form-group">
+                    <label for="proof_number">Proof Number:</label>
+                    {{ form.proof_number }}
+                </div>
+                <div class="form-group">
+                    <label for="issue_date">Issue Date:</label>
+                    {{ form.issue_date }}
+                </div>
+                <div class="form-group">
+                    <label for="expiry_date">Expiry Date:</label>
+                    {{ form.expiry_date }}
+                </div>
+                <div class="form-group">
+                    <label for="proof_document">Proof Document:</label>
+                    {{ form.proof_document }}
+                </div>
+                <button type="submit">Upload</button>
+            </form>
+            {% comment %} <a href="{% url 'view_id_proof' %}">View Your ID Proof</a> {% endcomment %}
+        </div>
+    </div>
+</body>
+</html>

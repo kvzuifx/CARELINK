@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track and Manage Your Inventory</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script> <!-- Include the datalabels plugin -->
+</head>
+<body>
+    <div style="width: 50%; margin: auto;">
+        <canvas id="supplyPieChart"></canvas>
+    </div>
+
+    <script>
+        var ctx = document.getElementById('supplyPieChart').getContext('2d');
+
+        // Prepare the data for Chart.js
+        var supplyCategories = {{ supply_categories|safe }};
+        
+        var labels = supplyCategories.map(function(item) {
+            return item.supply_category;
+        });
+
+        var data = supplyCategories.map(function(item) {
+            return item.count;
+        });
+
+        var chart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels, // Supply categories
+                datasets: [{
+                    label: 'Supply Categories',
+                    data: data, // Corresponding counts
+                    backgroundColor: [
+                        '#A6B37D', '#B99470', '#F05A7E', '#F9B572', '#FF8A8A', 
+                        '#F0EAAC', '#41B3A2', '#D7C3F1', '#C75B7A', '#B4E380'
+                    ], // Custom colors
+                    hoverBackgroundColor: [
+                        '#A6B37D', '#B99470', '#F05A7E', '#F9B572', '#FF8A8A', 
+                        '#F0EAAC', '#41B3A2', '#D7C3F1', '#C75B7A', '#B4E380'
+                    ],
+                    hoverOffset: 30  // Amount of pixels to move outwards on hover
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribution of Supply Categories'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                var label = context.label || '';
+                                var value = context.raw;
+                                var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                var percentage = ((value / total) * 100).toFixed(2) + '%';
+                                return label + ': ' + percentage;
+                            }
+                        }
+                    },
+                    datalabels: {
+                        formatter: (value, ctx) => {
+                            let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            let percentage = ((value * 100) / sum).toFixed(2) + "%";
+                            return percentage;
+                        },
+                        color: '#fff',
+                    }
+                }
+            },
+            plugins: [ChartDataLabels] // Add the ChartDataLabels plugin
+        });
+    </script>
+</body>
+</html>

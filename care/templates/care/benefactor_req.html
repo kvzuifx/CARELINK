@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Requests for Benefactor</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .blur {
+            filter: blur(30px); 
+        }
+
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Requests for Benefactor</h2>
+        {% if requests %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Serial No.</th>
+    
+                        <th>Supply ID</th>
+                        <th>Quantity Req</th>
+                        <th>Req Date</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Comments</th>
+                        <th>Reason</th>
+                        <th>Location</th>
+                        <th>Edit Status</th>
+                        <th>View Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in requests %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+
+                        <td>{{ request.supply }}</td> 
+                        <td>{{ request.quantity_req }}</td>
+                        <td>{{ request.req_date }}</td>
+                        <td>{{ request.status }}</td>
+                        <td>{{ request.priority }}</td>
+                        <td>{{ request.comments }}</td>
+                        <td>{{ request.reason }}</td>
+                        <td><a href="{{ request.dest_loc }}">{{ request.dest_loc }}</a></td>
+                        <td>
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="request_id" value="{{ request.pk }}">
+                                <select name="status" class="form-control">
+                                    <option value="approved">Approve</option>
+                                    <option value="declined">Decline</option>
+                                </select>
+                                <button type="submit" class="btn btn-primary mt-2">Update</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form method="post">
+                                <button type="button" class="btn btn-success mt-2" data-toggle="modal" data-target="#viewModal{{ request.req_id }}">VIEW</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <div class="modal fade" id="viewModal{{ request.req_id }}" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="viewModalLabel">Request Details</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <p><strong>Request ID:</strong> {{ request.req_id }}</p>
+                                    <p><strong>Requested By:</strong> {{ request.rec.ben_name }}</p>
+                                    <p><strong>Receiver ID:</strong> {{ request.rec_id }}</p>
+                                    <p><strong>Supply:</strong> {{ request.supply }}</p>
+                                    <p><strong>Quantity Requested:</strong> {{ request.quantity_req }}</p>
+                                    <p><strong>Request Date:</strong> {{ request.req_date }}</p>
+                                    <p><strong>Status:</strong> {{ request.status }}</p>
+                                    <p><strong>Priority:</strong> {{ request.priority }}</p>
+                                    <p><strong>Comments:</strong> {{ request.comments }}</p>
+                                    <p><strong>Reason:</strong> {{ request.reason }}</p>
+                                    <p><strong>Destination Location:</strong> {{ request.dest_loc }}</p>
+                                    <h4>ID Proof:</h4>
+                                                    <p>Type: Hospital ID</p>
+                                                    <p>Number: 9374652319</p>
+                                                    <p>Document: <a href="https://5.imimg.com/data5/SELLER/Default/2021/10/YZ/YM/KB/2672596/pvc-id-card-500x500.jpeg" target="_blank">View Document</a></p>
+                                    <h3>Benefactor Details</h3> 
+                                    <p><strong>Email:</strong> lakme@gmail.com</p>
+                                    <p><strong>Phone:</strong> 9364782341</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No requests found for your organization.</p>
+        {% endif %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $('#viewModal').on('show.bs.modal', function (e) {
+            $('.content').addClass('blur');
+        });
+
+        $('#viewModal').on('hidden.bs.modal', function (e) {
+            $('.content').removeClass('blur');
+        });
+    </script>
+</body>
+</html>

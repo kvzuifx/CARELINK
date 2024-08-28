@@ -1,0 +1,204 @@
+{%load static%}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Admin Dashboard | Redesign</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+       #map {
+            height: 1150px; /* Adjust the height as needed */
+            width: 100%;
+            position: relative; /* Ensure map container is relative for positioning */
+        }
+        .leaflet-control-custom {
+    background-color: rgb(217, 84, 84);
+    border: none; /* Remove the border */
+    border-radius: 8px; /* Increased border radius for a more rounded button */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5); /* Increased shadow for better visibility */
+    cursor: pointer;
+    text-align: center;
+    line-height: 40px; /* Increased line-height to match the new height */
+    font-size: 18px; /* Increased font size */
+    padding: 10px 20px; /* Increased padding */
+    margin: 10px; /* Increased margin */
+    position: absolute; /* Position it at the bottom right */
+    bottom: 10px;
+    right: 10px;
+    z-index: 1000; /* Ensure the button is on top */
+}
+
+
+        .leaflet-control-custom:hover {
+            background-color: #84c86d; /* Darker color on hover */
+        }
+/* Centering and Styling the Popup Form */
+.form-popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center the form */
+    border-radius: 10px; /* Rounded corners */
+    padding: 20px;
+    background-color: #fff; /* White background */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3); /* Subtle shadow */
+    z-index: 1000; /* Ensure the form is on top */
+    max-width: 500px; /* Increase the max-width */
+    width: 100%; /* Full width up to max-width */
+}
+
+/* Styling for form inputs and buttons */
+.form-popup input, .form-popup button {
+    margin: 10px 0;
+    padding: 12px; /* Adjusted padding for better appearance */
+    border-radius: 5px; /* Rounded corners */
+    border: 1px solid #ccc; /* Light grey border */
+    width: calc(100% - 24px); /* Full width with padding adjustment */
+    font-size: 16px; /* Larger font size for readability */
+}
+
+.form-popup input {
+    font-size: 16px; /* Ensures input font size is appropriate */
+}
+
+.form-popup button {
+    font-size: 16px; /* Consistent font size for buttons */
+    background-color: #b8dc95; /* Primary color for buttons */
+    color: #000000; /* Black text color */
+    border: none; /* Remove default border */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease; /* Smooth transition */
+}
+
+.form-popup button:hover {
+    background-color: #ffeb79; /* Darker color on hover */
+}
+
+.form-popup button.close {
+    background: #ffffff; /* White background for close button */
+    color: rgb(0, 0, 0);
+    border: none;
+}
+
+.form-popup button.close:hover {
+    background: #f5f5f5; /* Slightly darker white on hover */
+}
+
+/* Custom marker dot */
+.custom-dot {
+    background-color: red;
+    border-radius: 50%;
+    width: 30px; /* Size of the dot */
+    height: 30px;
+    display: block;
+    border: 3px solid #ffffff; /* Optional: white border around the dot */
+}
+
+/*navbar*/
+/* Topbar Container */
+/* Topbar Container */
+.topbar {
+    display: flex;
+    justify-content: space-between; /* Space out the items */
+    align-items: center;
+    background: var(--blue);
+    height: 60px;
+    padding: 0 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: relative;
+}
+
+/* Menu Toggle */
+.topbar .toggle {
+    font-size: 2.0em; /* Adjust as needed */
+    color: var(--white);
+}
+
+/* Center Navigation Links */
+.topbar .nav-links {
+    display: flex;
+    justify-content: center; /* Center the links horizontally */
+    flex-grow: 1; /* Allow the nav-links to take up available space */
+    gap: 30px; /* Adjust spacing between links */
+    font-size: 1.15em; /* Font size matching previous design */
+}
+
+.topbar .nav-links a {
+    text-decoration: none;
+    color: var(--white);
+    font-size: 1em; /* Font size matching previous design */
+    font-weight: 500; /* Font weight matching previous design */
+    position: relative;
+    transition: color 0.3s, transform 0.3s;
+}
+
+/* Add underline on hover */
+.topbar .nav-links a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 0;
+    height: 2px;
+    background: black;
+    transition: width 0.3s, background-color 0.3s;
+}
+
+/* Hover effect for links */
+.topbar .nav-links a:hover {
+    color: var(--hover-color);
+    transform: scale(1.1); /* Slightly increase the size on hover */
+    animation: pulse 1s ease infinite; /* Add pulse animation */
+}
+
+/* Underline expands on hover */
+.topbar .nav-links a:hover::after {
+    width: 100%;
+}
+
+/* Cool Animation for Link Hover */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+
+    </style>
+</head>
+<body>
+  {%block content%}
+  <div class="main">
+    <div class="topbar">
+        <div class="toggle">
+            <ion-icon name="menu-outline"></ion-icon>
+        </div>
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Account</a>
+            <a href="#">FAQ's</a>
+            <a href="#">Contact</a>
+            <a href="{% url 'notifications' user_id=user_benefactor.user_id %}" class="btn btn-info">View Notifications</a>
+        </div>
+    </div>
+
+    <div id="map" style="height: 600px;"></div>
+</div>
+</div>
+  {% endblock%}
+    </html>
+
+    

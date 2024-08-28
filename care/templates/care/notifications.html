@@ -1,0 +1,30 @@
+{% extends 'care/base.html' %}
+
+{% block content %}
+    <h1>Notifications</h1>
+    <ul>
+        {% for notification in notifications %}
+            <li>
+                <p><strong>{{ notification.notif_type }}:</strong> {{ notification.message }}</p>
+                <p><em>{{ notification.timestamp }}</em></p>
+                <p>Status: {{ notification.is_read }}</p>
+            </li>
+        {% empty %}
+            <p>No notifications.</p>
+        {% endfor %}
+    </ul>
+
+
+{% endblock %}
+
+
+{% for notification in notifications %}
+    <li>
+        <p><strong>{{ notification.notif_type }}:</strong> {{ notification.message }}</p>
+        <p><em>{{ notification.timestamp }}</em></p>
+        <p>Status: {{ notification.is_read }}</p>
+        {% if notification.is_read == 'No' %}
+            <a href="{% url 'mark_as_read' notification.notif_id %}" class="btn btn-warning">Mark as Read</a>
+        {% endif %}
+    </li>
+{% endfor %}
